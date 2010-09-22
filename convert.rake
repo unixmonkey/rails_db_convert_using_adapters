@@ -101,6 +101,8 @@ namespace :db do
           DevelopmentModelClass.transaction do
             models.each do |model|
               new_model = DevelopmentModelClass.new(model.attributes)
+              # don't miss the type attribute when using single-table-inheritance
+              new_model[:type] = model[:type] if model[:type].present?
               new_model.id = model.id
               new_model.save(false)
             end
