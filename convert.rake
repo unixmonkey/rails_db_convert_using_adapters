@@ -103,7 +103,16 @@ namespace :db do
           # Now, write out the prod data to the dev db
           DevelopmentModelClass.transaction do
             models.each do |model|
-              new_model = DevelopmentModelClass.new(model.attributes)
+            
+              new_model = DevelopmentModelClass.new()
+              
+              model.attributes.each do |key, value|
+              	begin
+              		new_model[key] = value
+              	rescue
+              	end
+              end
+              
               # don't miss the type attribute when using single-table-inheritance
               new_model[:type] = model[:type] if model[:type].present?
               new_model.id = model.id
