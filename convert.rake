@@ -71,8 +71,12 @@ namespace :db do
       # We do not want to use the real Model classes because any business
       # rules will likely get in the way of a database transfer
       class ProductionModelClass < ActiveRecord::Base
+      	# disable STI
+		self.inheritance_column = :_type_disabled
       end
       class DevelopmentModelClass < ActiveRecord::Base
+      	# disable STI
+		self.inheritance_column = :_type_disabled
       end
 
       skip_tables = ["schema_info", "schema_migrations"]
@@ -103,7 +107,7 @@ namespace :db do
               # don't miss the type attribute when using single-table-inheritance
               new_model[:type] = model[:type] if model[:type].present?
               new_model.id = model.id
-              new_model.save(false)
+              new_model.save(:validate => false)
             end
           end
         end
