@@ -71,8 +71,12 @@ namespace :db do
       # We do not want to use the real Model classes because any business
       # rules will likely get in the way of a database transfer
       class ProductionModelClass < ActiveRecord::Base
+      	# disable STI
+		self.inheritance_column = :_type_disabled
       end
       class DevelopmentModelClass < ActiveRecord::Base
+      	# disable STI
+		self.inheritance_column = :_type_disabled
       end
 
       skip_tables = ["schema_info", "schema_migrations"]
@@ -99,11 +103,20 @@ namespace :db do
           # Now, write out the prod data to the dev db
           DevelopmentModelClass.transaction do
             models.each do |model|
-              new_model = DevelopmentModelClass.new(model.attributes)
+            
+              new_model = DevelopmentModelClass.new()
+              
+              model.attributes.each do |key, value|
+              	begin
+              		new_model[key] = value
+              	rescue
+              	end
+              end
+              
               # don't miss the type attribute when using single-table-inheritance
               new_model[:type] = model[:type] if model[:type].present?
               new_model.id = model.id
-              new_model.save(false)
+              new_model.save(:validate => false)
             end
           end
         end
